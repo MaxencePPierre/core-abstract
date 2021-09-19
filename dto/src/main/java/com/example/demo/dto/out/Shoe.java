@@ -13,7 +13,7 @@ import lombok.Value;
 @JsonDeserialize(builder = ShoeBuilder.class)
 public class Shoe {
 
-  String     name;
+  BigInteger quantity;
   BigInteger size;
   Color      color;
 

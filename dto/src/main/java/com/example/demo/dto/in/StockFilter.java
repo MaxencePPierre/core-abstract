@@ -8,7 +8,6 @@ import java.util.Date;
 @Value
 public class StockFilter {
 
-    State state ;
     Shoes shoes;
     Date lastUpdate;
 
