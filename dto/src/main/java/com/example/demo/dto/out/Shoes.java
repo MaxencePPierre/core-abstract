@@ -7,12 +7,15 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Value;
 
-@Value
-@Builder
+
 @JsonDeserialize(builder = ShoesBuilder.class)
 public class Shoes {
 
   List<Shoe> shoes;
+
+  public Shoes() {
+
+  }
 
   @JsonPOJOBuilder(withPrefix = "")
   public static class ShoesBuilder {
@@ -20,4 +23,15 @@ public class Shoes {
   }
 
 
+  public List<Shoe> getShoes() {
+    return shoes;
+  }
+
+  public void setShoes(List<Shoe> shoes) {
+    this.shoes = shoes;
+  }
+
+  public Shoes(List<Shoe> shoes) {
+    this.shoes = shoes;
+  }
 }

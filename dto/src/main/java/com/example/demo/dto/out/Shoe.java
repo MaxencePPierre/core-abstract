@@ -8,7 +8,6 @@ import java.math.BigInteger;
 import lombok.Builder;
 import lombok.Value;
 
-@Value
 @Builder
 @JsonDeserialize(builder = ShoeBuilder.class)
 public class Shoe {
@@ -22,5 +21,21 @@ public class Shoe {
 
   }
 
+  public Shoe(BigInteger quantity, BigInteger size, Color color) {
+    this.quantity = quantity;
+    this.size = size;
+    this.color = color;
+  }
 
+  public BigInteger getQuantity() {
+    return quantity;
+  }
+
+  public BigInteger getSize() {
+    return size;
+  }
+
+  public Color getColor() {
+    return color;
+  }
 }
