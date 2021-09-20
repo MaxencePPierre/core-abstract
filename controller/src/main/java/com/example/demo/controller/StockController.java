@@ -8,6 +8,8 @@ import com.example.demo.dto.out.Shoes;
 import com.example.demo.dto.out.Stock;
 import com.example.demo.facade.StockFacade;
 import com.example.jpa.ShoeRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import java.util.List;
 
 @RestController
 @ControllerAdvice
+@Api( description="Stock API.")
+@RequestMapping(path = "/stock")
 public class StockController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
@@ -33,7 +37,8 @@ public class StockController {
     @Autowired
     StockFacade stockFacade;
 
-    @GetMapping(value = "/stock")
+    @ApiOperation(value = "Return the state of the stock, with the list of shoes.")
+    @GetMapping()
     public Stock getStock(@RequestHeader Integer version) {
         LOGGER.info("Get stock");
 
@@ -46,7 +51,8 @@ public class StockController {
         return stock;
     }
 
-    @PostMapping(value="/stock")
+    @ApiOperation(value = "Add a shoe to the stock.")
+    @PostMapping(value="/shoe")
     public ResponseEntity updateShoeStock(@RequestBody Shoe shoe, @RequestHeader Integer version) {
         LOGGER.info("Stock shoe updated");
         LOGGER.debug(shoe.toString());
@@ -86,8 +92,9 @@ public class StockController {
         return ResponseEntity.noContent().build();
     }
 
-
-    public ResponseEntity<Void> updateShoesStock(@RequestBody Shoes shoes, @RequestHeader Integer version) {
+    @ApiOperation(value = "Add a list of shoes to the stock.")
+    @PostMapping(value="/shoes")
+    public ResponseEntity<Void> updateShoesStock(@RequestBody List<Shoes> shoes, @RequestHeader Integer version) {
         LOGGER.info("Stock shoes updated");
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
     }

@@ -380,3 +380,22 @@ which should answer (see `com.example.demo.core.ShoeCoreNew.search`):
 We can see that both result are structurally identical, while the code is obviously different.
 
 This is indeed useful, since we can use almost any paradigm, segregate our code versions and eventually just drop one when implementation becomes unused and/or deprecated.
+
+# Shoe exhibition
+
+The shoe exhibition is an API providing a service depending on the available shoe stock.
+
+## Run the application
+
+To run the application, you can run the following command in the root folder of the project:
+
+```shell script
+mvn clean install && \
+  java -jar controller/target/controller-1.0.jar
+```
+
+## Documentation 
+
+The API documentation is available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). 
+
+It is also available in JSON format [http://localhost:8080/v2/api-docs](http://localhost:8080/v2/api-docs).
