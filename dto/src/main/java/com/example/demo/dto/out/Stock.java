@@ -9,7 +9,6 @@ public class Stock {
     public static Integer maxStockCapacity = 30;
     public static Integer minStockCapacity = 0;
 
-
     StockFilter.State state;
     List<Shoe> shoes;
 

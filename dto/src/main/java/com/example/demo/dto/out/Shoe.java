@@ -27,6 +27,10 @@ public class Shoe {
     this.color = color;
   }
 
+  public void setQuantity(BigInteger quantity) {
+    this.quantity = quantity;
+  }
+
   public BigInteger getQuantity() {
     return quantity;
   }

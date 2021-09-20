@@ -2,6 +2,7 @@ package com.example.demo.dto.converter;
 
 import com.example.demo.dto.in.ShoeFilter;
 import com.example.demo.dto.out.Shoe;
+import com.example.demo.dto.out.Stock;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,5 +26,14 @@ public class ShoeConverter {
 
     public List<ShoeFilter> dtoToEntity(List<Shoe> shoeList) {
         return  shoeList.stream().map(x -> dtoToEntity(x)).collect(Collectors.toList());
+    }
+
+    public Stock toStock(List<ShoeFilter> shoeFilterList) {
+        List<Shoe> shoeList = entityToDto(shoeFilterList);
+        Stock stock = new Stock();
+        stock.setShoes(shoeList);
+        stock.setState();
+
+        return stock;
     }
 }

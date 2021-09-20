@@ -1,13 +1,16 @@
 package com.example.demo.dto.in;
 
+import com.example.demo.dto.out.Shoe;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.Optional;
 
 @Entity
+@Table( name = "SHOE")
 public class ShoeFilter {
   @Id
-  @GeneratedValue(strategy= GenerationType.AUTO)
+  @GeneratedValue(strategy=GenerationType.IDENTITY)
   @Column(name = "id", nullable = false)
   private Long id;
   BigInteger   quantity;
@@ -26,14 +29,6 @@ public class ShoeFilter {
     this.size = size;
     this.color = color;
     this.quantity = quantity;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
   }
 
   public BigInteger getQuantity() {
@@ -68,5 +63,9 @@ public class ShoeFilter {
             ", color=" + color +
             ", quantity=" + quantity +
             '}';
+  }
+
+  public Long getId() {
+    return id;
   }
 }

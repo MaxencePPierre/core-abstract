@@ -6,10 +6,12 @@ import com.example.demo.dto.in.StockFilter;
 import com.example.demo.dto.out.Shoe;
 import com.example.demo.dto.out.Shoes;
 import com.example.demo.dto.out.Stock;
+import com.example.demo.facade.StockFacade;
 import com.example.jpa.ShoeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @RestController
+@ControllerAdvice
 public class StockController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StockController.class);
@@ -27,31 +30,66 @@ public class StockController {
     @Autowired
     ShoeConverter shoeConverter;
 
+    @Autowired
+    StockFacade stockFacade;
+
     @GetMapping(value = "/stock")
     public Stock getStock(@RequestHeader Integer version) {
         LOGGER.info("Get stock");
 
         // Search for shoe list in repository
         List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
-        List<Shoe> shoeList = shoeConverter.entityToDto(shoeFilterList);
 
         // Return stock shoes list and current state
-        Stock stock = new Stock();
-        stock.setShoes(shoeList);
-        stock.setState();
+        Stock stock = shoeConverter.toStock(shoeFilterList);
 
         return stock;
     }
 
     @PostMapping(value="/stock")
-    public ResponseEntity<Void> updateShoeStock(@RequestBody Shoe shoe, @RequestHeader Integer version) {
+    public ResponseEntity updateShoeStock(@RequestBody Shoe shoe, @RequestHeader Integer version) {
         LOGGER.info("Stock shoe updated");
-        LOGGER.info(shoe.toString());
+        LOGGER.debug(shoe.toString());
+
+        // Load stock
+        List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
+        Stock stock = shoeConverter.toStock(shoeFilterList);
+
+        // Verify stock status, 409 ?
+        if (stock.getState() == StockFilter.State.FULL) {
+            return ResponseEntity.badRequest().body("The current stock is full");
+        }
+
+        // Does it make sens ?
+        if (shoe.getQuantity().intValue() <= 0) {
+            return ResponseEntity.badRequest().body("Invalid body: quantity");
+        }
+
+        // Check the quantity provided will not exceed the stock capacity
+        BigInteger quantities = stockFacade.getTotalQuantity(stock);
+        Integer expected = quantities.add(shoe.getQuantity()).intValue();
+        if (expected > Stock.maxStockCapacity) {
+            return ResponseEntity.badRequest().body("The quantity supplied will exceed the stock");
+        }
+
+        // Write in repo
+        ShoeFilter currentShoe = shoeRepository.findByColorAndSize(shoe.getColor(), shoe.getSize());
+        if (currentShoe == null) {
+            LOGGER.debug("Shoe does not exist in stock");
+            shoeRepository.save(shoeConverter.dtoToEntity(shoe));
+            return ResponseEntity.noContent().build();
+        }
+
+        LOGGER.debug("Shoe is in stock");
+        BigInteger newQuantity = currentShoe.getQuantity().add(shoe.getQuantity());
+        shoeRepository.updateShoeQuantity(currentShoe.getId(), newQuantity);
         return ResponseEntity.noContent().build();
     }
+
+
     public ResponseEntity<Void> updateShoesStock(@RequestBody Shoes shoes, @RequestHeader Integer version) {
         LOGGER.info("Stock shoes updated");
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
     }
 
 }
