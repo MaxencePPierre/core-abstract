@@ -31,28 +31,14 @@ public class StockController {
     public Stock getStock(@RequestHeader Integer version) {
         LOGGER.info("Get stock");
 
+        // Search for shoe list in repository
         List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
         List<Shoe> shoeList = shoeConverter.entityToDto(shoeFilterList);
 
+        // Return stock shoes list and current state
         Stock stock = new Stock();
         stock.setShoes(shoeList);
-
-        if (shoeList.size() == 0) {
-            stock.setState(StockFilter.State.EMPTY);
-            return stock;
-        }
-
-        // Loop to optimize with line below
-        //BigInteger quantities = (BigInteger) shoeList.stream().map(x -> x.getQuantity().add(BigInteger.valueOf(0)));
-        BigInteger quantities = new BigInteger(String.valueOf(0));
-        for (Shoe shoe : shoeList) {
-            quantities = quantities.add(shoe.getQuantity());
-        }
-        if (quantities.compareTo(Stock.stockCapacity) == 0 ) {
-            stock.setState(StockFilter.State.FULL);
-        } else {
-            stock.setState(StockFilter.State.SOME);
-        }
+        stock.setState();
 
         return stock;
     }

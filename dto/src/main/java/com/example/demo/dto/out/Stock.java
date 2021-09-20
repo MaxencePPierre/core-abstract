@@ -6,7 +6,8 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class Stock {
-    public static BigInteger stockCapacity = new BigInteger(String.valueOf(30));
+    public static Integer maxStockCapacity = 30;
+    public static Integer minStockCapacity = 0;
 
 
     StockFilter.State state;
@@ -28,6 +29,29 @@ public class Stock {
         this.state = state;
     }
 
+    public void setState() {
+        if (this.shoes.size() == 0) {
+            this.state = StockFilter.State.EMPTY;
+            return;
+        }
+
+        BigInteger quantities = new BigInteger(String.valueOf(0));
+        for (Shoe shoe : this.shoes) {
+            quantities = quantities.add(shoe.getQuantity());
+        }
+
+        int quantity = quantities.intValue();
+        if (quantity >= Stock.maxStockCapacity) {
+            this.state = StockFilter.State.FULL;
+        } else if (quantity == Stock.minStockCapacity) {
+            this.state = StockFilter.State.EMPTY;
+        } else {
+            this.state = StockFilter.State.SOME;
+        }
+
+        return;
+    }
+
     public List<Shoe> getShoes() {
         return shoes;
     }
@@ -35,8 +59,6 @@ public class Stock {
     public void setShoes(List<Shoe> shoes) {
         this.shoes = shoes;
     }
-
-
 
 }
 
