@@ -39,7 +39,7 @@ public class StockController {
 
     @ApiOperation(value = "Return the state of the stock, with the list of shoes.")
     @GetMapping()
-    public Stock getStock(@RequestHeader Integer version) {
+    public Stock getStock() {
         LOGGER.info("Get stock");
 
         // Search for shoe list in repository
@@ -53,7 +53,7 @@ public class StockController {
 
     @ApiOperation(value = "Add a shoe to the stock.")
     @PostMapping(value="/shoe")
-    public ResponseEntity updateShoeStock(@RequestBody Shoe shoe, @RequestHeader Integer version) {
+    public ResponseEntity updateShoeStock(@RequestBody Shoe shoe) {
         LOGGER.info("Stock shoe updated");
         LOGGER.debug(shoe.toString());
 
@@ -94,9 +94,46 @@ public class StockController {
 
     @ApiOperation(value = "Add a list of shoes to the stock.")
     @PostMapping(value="/shoes")
-    public ResponseEntity<Void> updateShoesStock(@RequestBody List<Shoes> shoes, @RequestHeader Integer version) {
+    public ResponseEntity updateShoesStock(@RequestBody List<Shoe> shoes) {
         LOGGER.info("Stock shoes updated");
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
-    }
 
+        if (shoes.size() == 0) {
+            return ResponseEntity.noContent().build();
+        }
+
+        // Load stock
+        List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
+        Stock stock = shoeConverter.toStock(shoeFilterList);
+
+        // Verify stock status, 409 ?
+        if (stock.getState() == StockFilter.State.FULL) {
+            return ResponseEntity.badRequest().body("The current stock is full");
+        }
+
+        // Check stock capacity will not exceed
+        BigInteger quantities = stockFacade.getTotalQuantity(stock);
+        for (Shoe shoe : shoes) {
+            if (shoe.getQuantity().intValue() > 0) {
+                quantities = quantities.add(shoe.getQuantity());
+            } else {
+                return ResponseEntity.badRequest().body("Invalid body: quantity");
+            }
+        }
+        if (quantities.intValue() > Stock.maxStockCapacity) {
+            return ResponseEntity.badRequest().body("The quantity supplied will exceed the stock");
+        }
+
+        // Write in repo
+        for (Shoe shoe : shoes) {
+            ShoeFilter currentShoe = shoeRepository.findByColorAndSize(shoe.getColor(), shoe.getSize());
+            if (currentShoe == null) {
+                shoeRepository.save(shoeConverter.dtoToEntity(shoe));
+            } else {
+                BigInteger newQuantity = currentShoe.getQuantity().add(shoe.getQuantity());
+                shoeRepository.updateShoeQuantity(currentShoe.getId(), newQuantity);
+            }
+        }
+
+        return ResponseEntity.noContent().build();
+    }
 }
