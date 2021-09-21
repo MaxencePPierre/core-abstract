@@ -399,3 +399,11 @@ mvn clean install && \
 The API documentation is available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). 
 
 It is also available in JSON format [http://localhost:8080/v2/api-docs](http://localhost:8080/v2/api-docs).
+
+## Test the application
+
+You can first verify the application is alive using
+
+```shell script
+curl -X GET "http://localhost:8080/ping"
+```
