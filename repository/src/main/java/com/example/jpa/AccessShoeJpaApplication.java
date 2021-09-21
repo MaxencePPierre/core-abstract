@@ -51,6 +51,10 @@ public class AccessShoeJpaApplication {
             ShoeFilter blueShoeIn40 = repository.findByColorAndSize(ShoeFilter.Color.BLACK, new BigInteger(String.valueOf(40)));
             log.info(blueShoeIn40.toString());
             log.info("");
+            log.info("");
+            repository.deleteAll();
+            log.info("Database cleared:");
+            log.info("--------------------------------------------");
         };
     }
 }
