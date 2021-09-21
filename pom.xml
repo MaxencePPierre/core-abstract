@@ -11,7 +11,6 @@
     <module>core</module>
     <module>core-legacy</module>
     <module>core-new</module>
-    <module>repository</module>
   </modules>
 
   <parent>

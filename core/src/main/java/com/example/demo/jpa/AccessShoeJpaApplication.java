@@ -1,4 +1,4 @@
-package com.example.jpa;
+package com.example.demo.jpa;
 
 import com.example.demo.dto.in.ShoeFilter;
 import org.slf4j.Logger;
@@ -9,7 +9,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.math.BigInteger;
-
 
 @SpringBootApplication
 public class AccessShoeJpaApplication {

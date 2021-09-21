@@ -4,16 +4,14 @@ import com.example.demo.dto.converter.ShoeConverter;
 import com.example.demo.dto.in.ShoeFilter;
 import com.example.demo.dto.in.StockFilter;
 import com.example.demo.dto.out.Shoe;
-import com.example.demo.dto.out.Shoes;
 import com.example.demo.dto.out.Stock;
 import com.example.demo.facade.StockFacade;
-import com.example.jpa.ShoeRepository;
+import com.example.demo.jpa.ShoeRepository;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
