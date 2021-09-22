@@ -86,7 +86,7 @@ public class StockController {
 
         LOGGER.debug("Shoe is in stock");
         BigInteger newQuantity = currentShoe.getQuantity().add(shoe.getQuantity());
-        if (newQuantity.intValue() <= 0) {
+        if (newQuantity.intValue() < 0) {
             throw new ErrBadRequest("Invalid body. quantity: " + shoe.getQuantity().toString());
         }
         shoeRepository.updateShoeQuantity(currentShoe.getId(), newQuantity);

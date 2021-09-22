@@ -14,7 +14,7 @@
 - [Validating the application](#validating-the-application)
   - [Version 1](#version-1)
   - [Version 2](#version-2)
-
+- [Shoe exhibition](#shoe-exhibition)
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Explanations
@@ -330,60 +330,14 @@ Once you do that, your business implementation will be picked by the factory, in
 
 </details>
 
-## Versioning APIs
-
-Following a [REST API versioning guide](https://www.baeldung.com/rest-versioning), we think versioning using content negotiation is pretty relevant for our purpose:
-
-- we will be able to return different DTO for the same endpoint
-- we may simply fetch the `version` from the content type, and fetch our core implementation accordingly
-- our controllers will not depend on core implementation, but on the factory providing us core implementation
-
-# Validating the application
-
-To run the application, you can run the following command in the root folder of the project:
-
-```shell script
-mvn clean install && \
-  java -jar controller/target/controller-1.0.jar
-```
-
-## Version 1
-
-To test version 1, you can call:
-
-```shell script
-curl -X GET "http://localhost:8080/shoes/search" -H "version: 1"
-```
-
-which should answer (see `com.example.demo.core.ShoeCoreLegacy.search`):
-
-```json
-{"shoes":[{"name":"Legacy shoe","size":1,"color":"BLUE"}]}
-```
-
-## Version 2
-
-To test version 2, you can call:
-
-```shell script
-curl -X GET "http://localhost:8080/shoes/search" -H "version: 2"
-```
-
-which should answer (see `com.example.demo.core.ShoeCoreNew.search`):
-
-```json
-{"shoes":[{"name":"New shoe","size":2,"color":"BLACK"}]}
-```
-
-# Conclusion
-
-We can see that both result are structurally identical, while the code is obviously different.
-
-This is indeed useful, since we can use almost any paradigm, segregate our code versions and eventually just drop one when implementation becomes unused and/or deprecated.
-
 # Shoe exhibition
 
 The shoe exhibition is an API providing a service depending on the available shoe stock.
+Endpoints available:
+- `GET /ping`: Verify the service is alive
+- `GET /stock`: Return the current stock
+- `POST /stock/shoe`: Add a shoe model along with the quantity
+- `POST /stock/shoes`: Add several shoes and their quantities
 
 ## Run the application
 
@@ -394,16 +348,107 @@ mvn clean install && \
   java -jar controller/target/controller-1.0.jar
 ```
 
-## Documentation 
+## How to use the API 
 
-The API documentation is available at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html). 
-
-It is also available in JSON format [http://localhost:8080/v2/api-docs](http://localhost:8080/v2/api-docs).
-
-## Test the application
-
-You can first verify the application is alive using
+You can first verify the application is alive using:
 
 ```shell script
 curl -X GET "http://localhost:8080/ping"
 ```
+
+By default, the shoe stock is empty. You can verify it by running:
+```shell script
+curl -X GET "http://localhost:8080/stock"
+```
+
+You will get as result:
+```json
+{
+    "state": "EMPTY",
+    "shoes": []
+}
+```
+
+If you want to add a shoe model to add along with the quantity, run as follows:
+```shell script
+curl -X POST "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK","quantity": 10,"size": 30}'
+```
+
+It is also possible to submit a list containing all shoes and their quantities:
+```shell script
+curl -X POST "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
+	{
+      "color": "BLACK",
+      "quantity": 5,
+      "size": 40
+    },{
+      "color": "BLUE",
+      "quantity": 10,
+      "size": 41
+    },
+    {
+      "color": "BLACK",
+      "quantity": 5,
+      "size": 42
+    }
+	]'
+```
+
+At this point if you followed the steps, the stock should be `FULL`. A `GET /stock` should return:
+```json
+{
+    "state": "FULL",
+    "shoes": [
+        {
+            "quantity": 10,
+            "size": 30,
+            "color": "BLACK"
+        },
+        {
+            "quantity": 5,
+            "size": 40,
+            "color": "BLACK"
+        },
+        {
+            "quantity": 10,
+            "size": 41,
+            "color": "BLUE"
+        },
+        {
+            "quantity": 5,
+            "size": 42,
+            "color": "BLACK"
+        }
+    ]
+}
+```
+
+It is not possible to add any more shoe quantity to the stock. It is necessary to reduce the stock of existing shoes, as follows:
+```shell
+curl -X POST "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK", "quantity": -10, "size": 30}'
+```
+
+It is also possible to remove some shoe quantities while adding some other:
+```shell
+curl -X POST "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
+	{
+      "color": "BLUE",
+      "quantity": 10,
+      "size": 40
+    },{
+      "color": "BLUE",
+      "quantity": -10,
+      "size": 41
+    },
+    {
+      "color": "BLACK",
+      "quantity": 5,
+      "size": 42
+    }
+	]'
+```
+
+When submitting a large DTO containing all shoes and their quantities and one of the quantities is invalid (exceeding stock capacity or deletion greater than available stock), no shoe stock is updated.
+The API handles:
+- Exceeding stock capacity: conflict
+- Invalid quantity provided: bad request
