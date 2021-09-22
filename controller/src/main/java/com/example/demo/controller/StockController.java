@@ -50,7 +50,7 @@ public class StockController {
     }
 
     @ResponseBody
-    @PostMapping(value="/shoe")
+    @PatchMapping(value="/shoe")
     @ApiOperation(value = "Add a shoe to the stock.")
     public ResponseEntity<Object> updateShoeStock(@RequestBody Shoe shoe) {
         LOGGER.info("Stock shoe updated");
@@ -94,7 +94,7 @@ public class StockController {
     }
 
     @ApiOperation(value = "Add a list of shoes to the stock.")
-    @PostMapping(value="/shoes")
+    @PatchMapping(value="/shoes")
     public ResponseEntity<Object> updateShoesStock(@RequestBody List<Shoe> shoes) {
         LOGGER.info("Stock shoes updated");
 
@@ -111,7 +111,7 @@ public class StockController {
         BigInteger quantityRequest = stockFacade.getTotalQuantity(stockRequest);
         BigInteger quantity        = stockFacade.getTotalQuantity(stock);
         if (quantity.add(quantityRequest).intValue() > Stock.maxStockCapacity) {
-            throw new ErrBadRequest("Invalid body. total quantity provided: " + quantityRequest);
+            throw new ErrConflict("Stock is full. Maximum capacity is: " + Stock.maxStockCapacity.toString());
         }
 
         // Before writing in database we check all shoe quantities are valid for each
@@ -120,7 +120,7 @@ public class StockController {
             ShoeFilter currentShoe = shoeRepository.findByColorAndSize(shoe.getColor(), shoe.getSize());
             if (currentShoe == null) {
                 if (shoe.getQuantity().intValue() <= 0) {
-                    throw new ErrBadRequest("Invalid body. quantity: " + shoe.getQuantity().toString());
+                    throw new ErrBadRequest("Invalid body. Invalid quantity: " + shoe.getQuantity().toString());
                 }
             } else {
                 // We cannot remove more shoes than exist in stock

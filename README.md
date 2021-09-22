@@ -336,8 +336,8 @@ The shoe exhibition is an API providing a service depending on the available sho
 Endpoints available:
 - `GET /ping`: Verify the service is alive
 - `GET /stock`: Return the current stock
-- `POST /stock/shoe`: Add a shoe model along with the quantity
-- `POST /stock/shoes`: Add several shoes and their quantities
+- `PATCH /stock/shoe`: Add a shoe model along with the quantity
+- `PATCH /stock/shoes`: Add several shoes and their quantities
 
 ## Run the application
 
@@ -371,12 +371,12 @@ You will get as result:
 
 If you want to add a shoe model to add along with the quantity, run as follows:
 ```shell script
-curl -X POST "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK","quantity": 10,"size": 30}'
+curl -X PATCH "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK","quantity": 10,"size": 30}'
 ```
 
 It is also possible to submit a list containing all shoes and their quantities:
 ```shell script
-curl -X POST "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
+curl -X PATCH "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
 	{
       "color": "BLACK",
       "quantity": 5,
@@ -425,12 +425,12 @@ At this point if you followed the steps, the stock should be `FULL`. A `GET /sto
 
 It is not possible to add any more shoe quantity to the stock. It is necessary to reduce the stock of existing shoes, as follows:
 ```shell
-curl -X POST "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK", "quantity": -10, "size": 30}'
+curl -X PATCH "http://localhost:8080/stock/shoe" -H 'content-type: application/json' -d '{"color": "BLACK", "quantity": -10, "size": 30}'
 ```
 
 It is also possible to remove some shoe quantities while adding some other:
 ```shell
-curl -X POST "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
+curl -X PATCH "http://localhost:8080/stock/shoes" -H 'content-type: application/json' -d '[
 	{
       "color": "BLUE",
       "quantity": 10,
