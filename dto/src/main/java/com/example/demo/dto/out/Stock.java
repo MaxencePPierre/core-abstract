@@ -17,6 +17,10 @@ public class Stock {
         this.shoes = shoes;
     }
 
+    public Stock(List<Shoe> shoes) {
+        this.shoes = shoes;
+    }
+
     public Stock() {
     }
 

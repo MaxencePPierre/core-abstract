@@ -42,4 +42,12 @@ public class Shoe {
   public Color getColor() {
     return color;
   }
+
+  @Override
+  public String toString() {
+    return "Shoe{" +
+            "size=" + size +
+            ", color=" + color +
+            '}';
+  }
 }

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ErrConflict.class)
-    public final ResponseEntity<ErrorResponseBody> handleConflictError(ErrConflict ex) {
+    public final ResponseEntity<ErrorResponseBody> handleConflictError(ErrConflict ex, WebRequest request) {
         ErrorResponseBody error = new ErrorResponseBody(ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
