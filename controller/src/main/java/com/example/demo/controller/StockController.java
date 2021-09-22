@@ -5,13 +5,16 @@ import com.example.demo.dto.in.ShoeFilter;
 import com.example.demo.dto.in.StockFilter;
 import com.example.demo.dto.out.Shoe;
 import com.example.demo.dto.out.Stock;
+import com.example.demo.errors.ErrConflict;
+import com.example.demo.errors.ErrBadRequest;
 import com.example.demo.facade.StockFacade;
-import com.example.demo.jpa.ShoeRepository;
+import com.example.demo.repository.ShoeRepository;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +23,7 @@ import java.util.List;
 
 @RestController
 @ControllerAdvice
-@Api( description="Stock API.")
+@Api("Stock API.")
 @RequestMapping(path = "/stock")
 public class StockController {
 
@@ -44,16 +47,14 @@ public class StockController {
         List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
 
         // Return stock shoes list and current state
-        Stock stock = shoeConverter.toStock(shoeFilterList);
-
-        return stock;
+        return shoeConverter.toStock(shoeFilterList);
     }
 
-    @ApiOperation(value = "Add a shoe to the stock.")
+    @ResponseBody
     @PostMapping(value="/shoe")
-    public ResponseEntity updateShoeStock(@RequestBody Shoe shoe) {
+    @ApiOperation(value = "Add a shoe to the stock.")
+    public ResponseEntity<Object> updateShoeStock(@RequestBody Shoe shoe) {
         LOGGER.info("Stock shoe updated");
-        LOGGER.debug(shoe.toString());
 
         // Load stock
         List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
@@ -61,19 +62,21 @@ public class StockController {
 
         // Verify stock status, 409 ?
         if (stock.getState() == StockFilter.State.FULL) {
-            return ResponseEntity.badRequest().body("The current stock is full");
+            LOGGER.debug("Conflict: Stock is full");
+            throw new ErrConflict("Stock is full. Maximum capacity is: " + Stock.maxStockCapacity.toString());
         }
 
         // Does it make sens ?
         if (shoe.getQuantity().intValue() <= 0) {
-            return ResponseEntity.badRequest().body("Invalid body: quantity");
+            LOGGER.debug("Conflict: Stock is full");
+            throw new ErrBadRequest("Invalid body. quantity: " + shoe.getQuantity().toString());
         }
 
         // Check the quantity provided will not exceed the stock capacity
         BigInteger quantities = stockFacade.getTotalQuantity(stock);
-        Integer expected = quantities.add(shoe.getQuantity()).intValue();
+        int expected = quantities.add(shoe.getQuantity()).intValue();
         if (expected > Stock.maxStockCapacity) {
-            return ResponseEntity.badRequest().body("The quantity supplied will exceed the stock");
+            throw new ErrConflict("Stock is full. Maximum capacity is: " + Stock.maxStockCapacity);
         }
 
         // Write in repo
@@ -92,7 +95,7 @@ public class StockController {
 
     @ApiOperation(value = "Add a list of shoes to the stock.")
     @PostMapping(value="/shoes")
-    public ResponseEntity updateShoesStock(@RequestBody List<Shoe> shoes) {
+    public ResponseEntity<Object> updateShoesStock(@RequestBody List<Shoe> shoes) {
         LOGGER.info("Stock shoes updated");
 
         if (shoes.size() == 0) {
@@ -105,7 +108,7 @@ public class StockController {
 
         // Verify stock status, 409 ?
         if (stock.getState() == StockFilter.State.FULL) {
-            return ResponseEntity.badRequest().body("The current stock is full");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("The current stock is full.");
         }
 
         // Check stock capacity will not exceed

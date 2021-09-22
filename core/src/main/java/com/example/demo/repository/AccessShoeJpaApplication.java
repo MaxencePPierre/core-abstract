@@ -1,4 +1,4 @@
-package com.example.demo.jpa;
+package com.example.demo.repository;
 
 import com.example.demo.dto.in.ShoeFilter;
 import org.slf4j.Logger;
