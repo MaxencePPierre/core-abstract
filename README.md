@@ -394,7 +394,7 @@ curl -X PATCH "http://localhost:8080/stock/shoes" -H 'content-type: application/
 	]'
 ```
 
-At this point if you followed the steps, the stock should be `FULL`. A `GET /stock` should return:
+At this point if you followed the steps, the stock should be `FULL`. A `curl -X GET "http://localhost:8080/stock"` should return:
 ```json
 {
     "state": "FULL",
