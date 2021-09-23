@@ -339,6 +339,12 @@ Endpoints available:
 - `PATCH /stock/shoe`: Add a shoe model along with the quantity
 - `PATCH /stock/shoes`: Add several shoes and their quantities
 
+When submitting a large DTO containing all shoes and their quantities and one of the quantities is invalid (exceeding stock capacity or deletion greater than available stock), no shoe stock is updated.
+The API handles:
+- Exceeding stock capacity (maximum 30): conflict
+- Invalid quantity provided: bad request
+- Invalid shoe size (the size must be between 19 and 50 inclusive): bad request
+
 ## Run the application
 
 To run the application, you can run the following command in the root folder of the project:
@@ -448,7 +454,9 @@ curl -X PATCH "http://localhost:8080/stock/shoes" -H 'content-type: application/
 	]'
 ```
 
-When submitting a large DTO containing all shoes and their quantities and one of the quantities is invalid (exceeding stock capacity or deletion greater than available stock), no shoe stock is updated.
-The API handles:
-- Exceeding stock capacity: conflict
-- Invalid quantity provided: bad request
+What I would have done to go further:
+- Improve rest exception handler
+- Refactor code: Add a service layer (not mandatory for a small microservice)
+- Improve and implement JUnit/TestNG tests
+- Add API documentation (url swagger: not found ..., to fix)
+- Nice to have: embeds the service in Docker image

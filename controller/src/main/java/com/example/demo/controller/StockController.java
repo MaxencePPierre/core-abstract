@@ -7,6 +7,7 @@ import com.example.demo.dto.out.Shoe;
 import com.example.demo.dto.out.Stock;
 import com.example.demo.errors.ErrBadRequest;
 import com.example.demo.errors.ErrConflict;
+import com.example.demo.facade.ShoeFacade;
 import com.example.demo.facade.StockFacade;
 import com.example.demo.repository.ShoeRepository;
 import io.swagger.annotations.Api;
@@ -37,6 +38,9 @@ public class StockController {
     @Autowired
     StockFacade stockFacade;
 
+    @Autowired
+    ShoeFacade shoeFacade;
+
     @ApiOperation(value = "Return the state of the stock, with the list of shoes.")
     @GetMapping()
     public Stock getStock() {
@@ -58,6 +62,11 @@ public class StockController {
         // Load stock
         List<ShoeFilter> shoeFilterList = shoeRepository.findAll();
         Stock stock = shoeConverter.toStock(shoeFilterList);
+
+        // Check size is valid
+        if (!shoeFacade.validateShoeSize(shoe.getSize().intValue())) {
+            throw new ErrBadRequest("Invalid body. Invalid size: " + shoe.getSize().toString());
+        }
 
         // Verify stock status
         int requestQuantity = shoe.getQuantity().intValue();
@@ -117,6 +126,9 @@ public class StockController {
         // Before writing in database we check all shoe quantities are valid for each
         // Nice to have: transactional query to rollback/commit
         for (Shoe shoe : shoes) {
+            if (!shoeFacade.validateShoeSize(shoe.getSize().intValue())) {
+                throw new ErrBadRequest("Invalid body. Invalid size: " + shoe.getSize().toString());
+            }
             ShoeFilter currentShoe = shoeRepository.findByColorAndSize(shoe.getColor(), shoe.getSize());
             if (currentShoe == null) {
                 if (shoe.getQuantity().intValue() <= 0) {

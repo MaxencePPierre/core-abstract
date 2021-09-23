@@ -11,6 +11,8 @@ import lombok.Value;
 @Builder
 @JsonDeserialize(builder = ShoeBuilder.class)
 public class Shoe {
+  public static Integer maxSize = 50;
+  public static Integer minSize = 19;
 
   BigInteger quantity;
   BigInteger size;
